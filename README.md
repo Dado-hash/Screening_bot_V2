@@ -1,14 +1,28 @@
 # Cryptocurrency Screening Bot V2 🚀
 
-Un bot avanzato per lo screening e l'analisi di criptovalute con integrazione a CoinGecko e Binance APIs.
+Sistema modernizzato per lo screening di criptovalute con database SQLite, interfaccia web interattiva e parametri configurabili in tempo reale.
 
 ## 🎯 Funzionalità
 
-- **Raccolta Dati Storici**: Integrazione con CoinGecko e Binance per dati storici completi
-- **Analisi Tecnica**: Calcolo di indicatori tecnici, SMA e analisi della volatilità
-- **Screening Automatico**: Identificazione automatica di opportunità di trading
-- **Analisi Ciclica**: Rilevamento di pattern e cicli di mercato
-- **Report Excel**: Generazione automatica di report dettagliati
+### Core Features:
+- **Database SQLite**: Storage persistente con SQLAlchemy ORM
+- **Web Dashboard**: Interfaccia Streamlit con parametri configurabili
+- **Performance Ottimizzate**: 919x più veloce della versione precedente
+- **API Integration**: CoinGecko con rate limiting intelligente
+- **Cache System**: Cache database con TTL per ridurre chiamate API
+
+### Analisi Features:
+- **Screening Moderno**: Algoritmi vettorizzati con pandas/numpy
+- **SMA Indicators**: Periodi configurabili (6, 11, 21) dall'interfaccia web
+- **Multi-timeframe**: Analisi su timeframes multipli (1-30 giorni)
+- **Scoring System**: Sistema di punteggi configurabile per ranking e SMA
+- **Visualizations**: Grafici interattivi con Plotly
+
+### Interface Features:
+- **Real-time Configuration**: Parametri modificabili dall'interfaccia web
+- **Interactive Charts**: Performance charts, heatmaps, distribuzioni
+- **Export Multiplo**: Excel, CSV, JSON download
+- **Progress Tracking**: Barre di progresso e status in tempo reale
 
 ## 📁 Struttura del Progetto
 
@@ -52,21 +66,61 @@ cp config/api_keys.py.example config/api_keys.py
 # Modifica il file con le tue API keys
 ```
 
+## 🌐 Web Dashboard (NUOVO - Phase 3)
+
+**Modo Principale - Interfaccia Web Interattiva:**
+
+```bash
+python dashboard.py
+```
+
+La dashboard si aprirà su `http://localhost:8501` con:
+
+### 🎛️ Parametri Configurabili in Tempo Reale:
+- **SMA Periods**: Fast (3-15), Medium (8-25), Slow (15-50)
+- **Rank Scores**: Top 10/15/20 configurable scores
+- **SMA Scores**: Above/Below Fast/Medium/Slow configurable scores
+- **Filters**: Min volume, max coins per analysis
+
+### 🎯 Screening Interattivo:
+- **Coin Selection**: Multiselect da database
+- **Date Picker**: Analysis date selection
+- **Direction**: Forward/Backward analysis
+- **Timeframes**: Multi-select 1-30 days
+
+### 📊 Visualizzazioni Interactive:
+- **Performance Charts**: Total Score vs Average Return
+- **Score Distribution**: Histogram distribution
+- **Timeframe Heatmaps**: Score heatmap by coin and timeframe
+- **Detailed Analytics**: Filterable results tables
+
+### 📥 Export Multiplo:
+- **Excel**: Complete analysis with timeframe breakdown
+- **CSV**: Leaderboard data download
+- **JSON**: Full results data export
+
+## 📋 CLI Mode (Legacy)
+
 ### Utilizzo Base
 
-1. **Raccolta Dati Storici**:
+1. **Setup Database**:
 ```bash
-python src/data_fetchers/get_historical_data_coingecko.py
+python setup_database.py
 ```
 
-2. **Screening Principale**:
+2. **Raccolta Dati Moderni**:
 ```bash
-python src/analyzers/screening_coins_master.py
+python src/data_fetchers/get_historical_data_modern.py
 ```
 
-3. **Analisi dei Risultati**:
-   - I risultati sono salvati in `data/outputs/`
-   - Controlla i file Excel generati per le analisi
+3. **Screening CLI Moderno**:
+```bash
+python src/analyzers/screening_coins_modern.py
+```
+
+4. **Analisi dei Risultati**:
+   - Database SQLite in `data/screening_bot.db`
+   - Export Excel in `data/outputs/`
 
 ## 📊 Workflow Consigliato
 
