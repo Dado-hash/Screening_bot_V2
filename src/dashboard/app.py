@@ -48,18 +48,21 @@ class ScreeningDashboard:
         self.render_sidebar()
         
         # Main content tabs
-        tab1, tab2, tab3, tab4 = st.tabs(["🎯 Screening", "📊 Visualizations", "⚙️ Configuration", "📈 Results"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Data Management", "🎯 Screening", "📈 Visualizations", "⚙️ Configuration", "📋 Results"])
         
         with tab1:
-            self.render_screening_tab()
+            self.render_data_management_tab()
         
         with tab2:
+            self.render_screening_tab()
+        
+        with tab3:
             self.render_visualizations_tab()
             
-        with tab3:
+        with tab4:
             self.render_configuration_tab()
             
-        with tab4:
+        with tab5:
             self.render_results_tab()
     
     def render_sidebar(self):
@@ -147,6 +150,251 @@ class ScreeningDashboard:
         
         # Update screening service
         self.screening_service.config = new_config
+    
+    def render_data_management_tab(self):
+        """Render data management interface for populating database."""
+        st.header("📊 Data Management")
+        st.markdown("**Popola il database con coin da diverse fonti dati**")
+        
+        # Current database status
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("📈 Database Status")
+            try:
+                stats = self.data_service.get_data_coverage_stats()
+                st.metric("Total Cryptocurrencies", stats.get('total_cryptocurrencies', 0))
+                st.metric("Active Cryptocurrencies", stats.get('active_cryptocurrencies', 0))
+                st.metric("Price Records", stats.get('total_price_records', 0))
+                st.metric("SMA Records", stats.get('total_sma_records', 0))
+            except Exception as e:
+                st.error(f"Error loading database stats: {e}")
+        
+        with col2:
+            st.subheader("🔌 Available Data Sources")
+            try:
+                sources = self.data_service.get_available_data_sources()
+                
+                for source_name, source_info in sources.items():
+                    status = "✅ Available" if source_info['available'] else "❌ Not configured"
+                    st.write(f"**{source_name.title()}**: {status}")
+                    
+                    # Show API key status for CoinGecko
+                    if source_name == 'coingecko':
+                        api_key_status = "🔑 With API Key" if source_info.get('has_api_key') else "🆓 Free (rate limited)"
+                        st.write(f"  - Status: {api_key_status}")
+                    
+                    st.write(f"  - {source_info['description']}")
+                    st.write(f"  - Max coins: {source_info['max_coins']}")
+                    st.write("")
+            except Exception as e:
+                st.error(f"Error loading data sources: {e}")
+        
+        st.divider()
+        
+        # Data fetching section
+        st.subheader("🚀 Fetch New Cryptocurrency Data")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("### 🥇 CoinGecko - Top by Market Cap")
+            
+            number_coins = st.number_input(
+                "Number of top coins to fetch",
+                min_value=10,
+                max_value=1000,
+                value=100,
+                step=10,
+                help="Fetch top cryptocurrencies by market capitalization"
+            )
+            
+            if st.button("🔄 Fetch from CoinGecko", type="primary"):
+                self.fetch_coingecko_data(number_coins)
+        
+        with col2:
+            st.markdown("### ⚡ Binance - All BTC Pairs")
+            
+            st.info("Fetches all active BTC trading pairs from Binance exchange")
+            
+            if st.button("🔄 Fetch from Binance"):
+                self.fetch_binance_data()
+        
+        st.divider()
+        
+        # Historical data fetching
+        st.subheader("📅 Fetch Historical Price Data")
+        
+        available_coins = self.get_available_coins()
+        
+        if available_coins:
+            selected_coins_for_history = st.multiselect(
+                "Select coins for historical data fetch",
+                options=available_coins,
+                default=available_coins[:min(20, len(available_coins))],
+                help="Select coins to fetch historical price data"
+            )
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                history_days = st.number_input(
+                    "Days of historical data",
+                    min_value=7,
+                    max_value=365,
+                    value=30,
+                    help="Number of days of historical data to fetch"
+                )
+            
+            with col2:
+                if st.button("📊 Fetch Historical Data", disabled=not selected_coins_for_history):
+                    if selected_coins_for_history:
+                        self.fetch_historical_data(selected_coins_for_history, history_days)
+        else:
+            st.warning("No coins available. Please fetch coins from CoinGecko or Binance first.")
+        
+        st.divider()
+        
+        # API Keys configuration info
+        st.subheader("🔑 API Keys Configuration")
+        
+        st.info(
+            """
+            **Per ottimizzare le performance:**
+            
+            **CoinGecko** (Raccomandato):
+            - ✅ Funziona già senza API key (rate limited)
+            - 🚀 Con API key: rate limits più alti
+            - 📝 Registrati gratis su: https://www.coingecko.com/en/api
+            
+            **Binance** (Opzionale):
+            - 🔐 Richiede API key per accesso
+            - 📝 Crea API key su: https://www.binance.com/en/my/settings/api-management
+            
+            **Come configurare:**
+            1. Modifica il file `config/api_keys.py`
+            2. Inserisci le tue API keys
+            3. Riavvia la dashboard
+            """
+        )
+        
+        # Show current API configuration
+        with st.expander("🔍 Current API Configuration"):
+            try:
+                from config.settings import get_api_config
+                api_config = get_api_config()
+                
+                coingecko_configured = bool(api_config.coingecko_api_key and 
+                                          api_config.coingecko_api_key != "your_coingecko_api_key_here")
+                binance_configured = bool(api_config.binance_api_key and api_config.binance_secret_key and
+                                        api_config.binance_api_key != "your_binance_api_key_here")
+                
+                st.write(f"**CoinGecko API Key**: {'✅ Configured' if coingecko_configured else '❌ Not configured (using free access)'}")
+                st.write(f"**Binance API Key**: {'✅ Configured' if binance_configured else '❌ Not configured'}")
+                
+            except Exception as e:
+                st.error(f"Error checking API configuration: {e}")
+    
+    def fetch_coingecko_data(self, number_coins: int):
+        """Fetch cryptocurrency data from CoinGecko."""
+        with st.spinner(f"🔄 Fetching top {number_coins} coins from CoinGecko..."):
+            try:
+                import asyncio
+                
+                # Run async function
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                result = loop.run_until_complete(
+                    self.data_service.populate_coins_from_coingecko(number_coins)
+                )
+                loop.close()
+                
+                if result.get('success'):
+                    st.success(f"✅ CoinGecko fetch completed!")
+                    st.write(f"- Added: {result.get('added', 0)} new coins")
+                    st.write(f"- Updated: {result.get('updated', 0)} existing coins")
+                    st.write(f"- Total: {result.get('total', 0)} coins processed")
+                    
+                    # Refresh the page to show updated stats
+                    st.rerun()
+                else:
+                    st.error(f"❌ CoinGecko fetch failed: {result.get('error', 'Unknown error')}")
+                    
+            except Exception as e:
+                st.error(f"Error fetching CoinGecko data: {e}")
+    
+    def fetch_binance_data(self):
+        """Fetch cryptocurrency data from Binance."""
+        with st.spinner("🔄 Fetching BTC pairs from Binance..."):
+            try:
+                result = self.data_service.populate_coins_from_binance()
+                
+                if result.get('success'):
+                    st.success(f"✅ Binance fetch completed!")
+                    st.write(f"- Added: {result.get('added', 0)} new coins")
+                    st.write(f"- Updated: {result.get('updated', 0)} existing coins")
+                    st.write(f"- Total: {result.get('total', 0)} coins processed")
+                    
+                    # Refresh the page to show updated stats
+                    st.rerun()
+                else:
+                    st.error(f"❌ Binance fetch failed: {result.get('error', 'Unknown error')}")
+                    
+            except Exception as e:
+                st.error(f"Error fetching Binance data: {e}")
+    
+    def fetch_historical_data(self, coin_ids: List[str], days: int):
+        """Fetch historical data for selected coins."""
+        with st.spinner(f"📊 Fetching {days} days of historical data for {len(coin_ids)} coins..."):
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            try:
+                import asyncio
+                
+                status_text.text("Initializing data fetch...")
+                progress_bar.progress(10)
+                
+                # Run async function
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                
+                status_text.text("Fetching data from CoinGecko...")
+                progress_bar.progress(50)
+                
+                result = loop.run_until_complete(
+                    self.data_service.fetch_and_store_historical_data(coin_ids, days)
+                )
+                loop.close()
+                
+                progress_bar.progress(90)
+                status_text.text("Processing and storing data...")
+                
+                if result.get('success'):
+                    progress_bar.progress(100)
+                    status_text.text("✅ Historical data fetch completed!")
+                    
+                    st.success(f"✅ Historical data fetch completed!")
+                    st.write(f"- Processed: {result.get('processed', 0)} coins")
+                    st.write(f"- Errors: {result.get('errors', 0)} coins")
+                    st.write(f"- Total requested: {result.get('total_coins', 0)} coins")
+                    
+                    if result.get('errors', 0) > 0:
+                        st.warning(f"⚠️ {result.get('errors')} coins had errors during fetch")
+                    
+                    # Clear progress indicators
+                    progress_bar.empty()
+                    status_text.empty()
+                    
+                else:
+                    st.error(f"❌ Historical data fetch failed: {result.get('error', 'Unknown error')}")
+                    progress_bar.empty()
+                    status_text.empty()
+                    
+            except Exception as e:
+                st.error(f"Error fetching historical data: {e}")
+                progress_bar.empty()
+                status_text.empty()
     
     def render_screening_tab(self):
         """Render main screening interface using existing ScreeningService."""

@@ -137,6 +137,50 @@ class CoinGeckoService:
                 logger.error(f"Error fetching historical data for {coin_id}: {e}")
                 raise
     
+    async def get_top_coins_by_market_cap(self, limit: int = 100, vs_currency: str = 'btc') -> List[Dict[str, Any]]:
+        """Fetch top coins by market cap - alias for fetch_top_cryptocurrencies."""
+        return await self.fetch_top_cryptocurrencies(limit=limit, vs_currency=vs_currency)
+    
+    async def fetch_multiple_historical_data(self, coin_ids: List[str], days: int = 30, 
+                                           vs_currency: str = 'btc') -> Dict[str, Dict[str, Any]]:
+        """Fetch historical data for multiple coins."""
+        logger.info(f"Fetching historical data for {len(coin_ids)} coins, {days} days")
+        
+        results = {}
+        
+        # Use throttling to respect API limits
+        for coin_id in coin_ids:
+            async with self.throttler:
+                try:
+                    historical_data = await self.fetch_historical_data(coin_id, vs_currency, days)
+                    
+                    # Convert to expected format
+                    prices_data = []
+                    for data_point in historical_data:
+                        prices_data.append({
+                            'date': data_point['date'],
+                            'price_btc': data_point['price'],
+                            'market_cap': data_point.get('market_cap'),
+                            'volume': data_point.get('volume')
+                        })
+                    
+                    results[coin_id] = {
+                        'success': True,
+                        'prices': prices_data
+                    }
+                    
+                    logger.debug(f"Successfully fetched data for {coin_id}: {len(prices_data)} price points")
+                    
+                except Exception as e:
+                    logger.error(f"Error fetching data for {coin_id}: {e}")
+                    results[coin_id] = {
+                        'success': False,
+                        'error': str(e)
+                    }
+        
+        logger.info(f"Completed fetching data for {len(results)} coins")
+        return results
+    
     async def store_cryptocurrencies_to_db(self, crypto_data: List[Dict[str, Any]]) -> int:
         """Store cryptocurrency data to database."""
         logger.info(f"Storing {len(crypto_data)} cryptocurrencies to database")
