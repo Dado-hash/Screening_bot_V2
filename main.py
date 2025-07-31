@@ -118,10 +118,11 @@ def run_screening():
     
     if screen_type == "Screening Master (Principale)":
         try:
-            from analyzers.screening_coins_master import main
-            main()
-        except ImportError as e:
-            print(f"{Fore.RED}❌ Errore import: {e}{Style.RESET_ALL}")
+            import subprocess
+            import sys
+            subprocess.run([sys.executable, "src/analyzers/screening_coins_modern.py"])
+        except Exception as e:
+            print(f"{Fore.RED}❌ Errore screening: {e}{Style.RESET_ALL}")
     elif screen_type == "Screening 30 giorni CoinGecko":
         try:
             from analyzers.screening_coins_30d_coingecko import main
