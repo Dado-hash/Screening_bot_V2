@@ -9,6 +9,6 @@ __author__ = "Dado-hash"
 __email__ = "your.email@example.com"
 
 # Importazioni principali
-from .data_fetchers import *
-from .analyzers import *
-from .utils import *
+from src.data_fetchers import *
+from src.analyzers import *
+from src.utils import *

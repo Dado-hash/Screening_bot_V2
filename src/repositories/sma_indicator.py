@@ -9,8 +9,8 @@ from sqlalchemy import and_, desc, asc
 from loguru import logger
 import pandas as pd
 
-from .base import BaseRepository
-from ..database.models import SMAIndicator, Cryptocurrency
+from src.repositories.base import BaseRepository
+from src.database.models import SMAIndicator, Cryptocurrency
 
 
 class SMAIndicatorRepository(BaseRepository[SMAIndicator]):

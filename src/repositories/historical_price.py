@@ -10,8 +10,8 @@ from sqlalchemy import and_, desc, asc, func
 from loguru import logger
 import pandas as pd
 
-from .base import BaseRepository
-from ..database.models import HistoricalPrice, Cryptocurrency
+from src.repositories.base import BaseRepository
+from src.database.models import HistoricalPrice, Cryptocurrency
 
 
 class HistoricalPriceRepository(BaseRepository[HistoricalPrice]):

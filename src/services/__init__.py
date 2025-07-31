@@ -1,8 +1,8 @@
 """Services package for business logic."""
 
-from .data_service import DataService
-from .screening_service import ScreeningService
-from .coingecko_service import CoinGeckoService
+from src.services.data_service import DataService
+from src.services.screening_service import ScreeningService
+from src.services.coingecko_service import CoinGeckoService
 
 __all__ = [
     'DataService',

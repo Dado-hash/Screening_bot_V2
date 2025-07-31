@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from loguru import logger
 
-from .base import BaseRepository
-from ..database.models import Cryptocurrency
+from src.repositories.base import BaseRepository
+from src.database.models import Cryptocurrency
 
 
 class CryptocurrencyRepository(BaseRepository[Cryptocurrency]):
