@@ -254,47 +254,7 @@ class ScreeningDashboard:
             st.warning("No coins available. Please fetch coins from CoinGecko or Binance first.")
         
         st.divider()
-        
-        # API Keys configuration info
-        st.subheader("🔑 API Keys Configuration")
-        
-        st.info(
-            """
-            **Per ottimizzare le performance:**
-            
-            **CoinGecko** (Raccomandato):
-            - ✅ Funziona già senza API key (rate limited)
-            - 🚀 Con API key: rate limits più alti
-            - 📝 Registrati gratis su: https://www.coingecko.com/en/api
-            
-            **Binance** (Opzionale):
-            - 🔐 Richiede API key per accesso
-            - 📝 Crea API key su: https://www.binance.com/en/my/settings/api-management
-            
-            **Come configurare:**
-            1. Modifica il file `config/api_keys.py`
-            2. Inserisci le tue API keys
-            3. Riavvia la dashboard
-            """
-        )
-        
-        # Show current API configuration
-        with st.expander("🔍 Current API Configuration"):
-            try:
-                from config.settings import get_api_config
-                api_config = get_api_config()
-                
-                coingecko_configured = bool(api_config.coingecko_api_key and 
-                                          api_config.coingecko_api_key != "your_coingecko_api_key_here")
-                binance_configured = bool(api_config.binance_api_key and api_config.binance_secret_key and
-                                        api_config.binance_api_key != "your_binance_api_key_here")
-                
-                st.write(f"**CoinGecko API Key**: {'✅ Configured' if coingecko_configured else '❌ Not configured (using free access)'}")
-                st.write(f"**Binance API Key**: {'✅ Configured' if binance_configured else '❌ Not configured'}")
-                
-            except Exception as e:
-                st.error(f"Error checking API configuration: {e}")
-    
+
     def fetch_coingecko_data(self, number_coins: int):
         """Fetch cryptocurrency data from CoinGecko."""
         with st.spinner(f"🔄 Fetching top {number_coins} coins from CoinGecko..."):
