@@ -1,6 +1,16 @@
 # Configurazione locale per sviluppo
 # Non committare questo file!
 
+# Database
+DATABASE_URL = "sqlite:///data/screening_bot.db"
+
+# API Rate Limits (requests per minute)
+API_RATE_LIMITS = {
+    "coingecko": 10,
+    "binance": 1200,
+    "default": 60
+}
+
 # Parametri di default per testing
 DEFAULT_DAYS = 30
 DEFAULT_COINS_LIMIT = 50
