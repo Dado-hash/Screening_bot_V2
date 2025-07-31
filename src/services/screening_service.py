@@ -308,8 +308,8 @@ class ScreeningService:
             coin_aggregates[coin_id]['avg_return'] += result['cumulative_return']
             coin_aggregates[coin_id]['best_rank'] = min(coin_aggregates[coin_id]['best_rank'], 
                                                        result['rank_position'])
-            coin_aggregates[coin_id]['timeframe_scores'][result['timeframe']] = result['total_score']
-            coin_aggregates[coin_id]['timeframe_returns'][result['timeframe']] = result['cumulative_return']
+            coin_aggregates[coin_id]['timeframe_scores'][str(result['timeframe'])] = result['total_score']
+            coin_aggregates[coin_id]['timeframe_returns'][str(result['timeframe'])] = result['cumulative_return']
         
         # Calculate averages and sort
         leaderboard = []

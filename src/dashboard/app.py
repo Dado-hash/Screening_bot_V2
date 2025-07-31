@@ -552,6 +552,27 @@ class ScreeningDashboard:
                         st.error("Export failed")
                 except Exception as e:
                     st.error(f"Export error: {e}")
+        
+        with col2:
+            if st.button("📋 Download JSON"):
+                json_data = json.dumps(results, indent=2, default=str)
+                st.download_button(
+                    label="Download JSON",
+                    data=json_data,
+                    file_name=f"screening_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                    mime="application/json"
+                )
+        
+        with col3:
+            if st.button("📄 Download CSV"):
+                if results.get('leaderboard'):
+                    csv_data = pd.DataFrame(results['leaderboard']).to_csv(index=False)
+                    st.download_button(
+                        label="Download CSV",
+                        data=csv_data,
+                        file_name=f"leaderboard_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                        mime="text/csv"
+                    )
     
     def render_daily_evolution_table(self, results: Dict[str, Any]):
         """Render daily evolution table like the Excel cumulative_changes."""
@@ -582,9 +603,10 @@ class ScreeningDashboard:
             
             # Add scores for each timeframe (day)
             for tf in sorted(timeframes):
-                if tf in timeframe_scores:
-                    score = timeframe_scores[tf]
-                    return_pct = timeframe_returns.get(tf, 0)
+                tf_str = str(tf)  # Convert to string to match dictionary keys
+                if tf_str in timeframe_scores:
+                    score = timeframe_scores[tf_str]
+                    return_pct = timeframe_returns.get(tf_str, 0)
                     # Show score and return percentage
                     row[f'{tf}d Score'] = score
                     row[f'{tf}d Return%'] = round(return_pct, 2)
@@ -676,28 +698,7 @@ class ScreeningDashboard:
                     )
         else:
             st.warning("No evolution data available to display.")
-        
-        with col2:
-            if st.button("📋 Download JSON"):
-                json_data = json.dumps(results, indent=2, default=str)
-                st.download_button(
-                    label="Download JSON",
-                    data=json_data,
-                    file_name=f"screening_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                    mime="application/json"
-                )
-        
-        with col3:
-            if st.button("📄 Download CSV"):
-                if results.get('leaderboard'):
-                    csv_data = pd.DataFrame(results['leaderboard']).to_csv(index=False)
-                    st.download_button(
-                        label="Download CSV",
-                        data=csv_data,
-                        file_name=f"leaderboard_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                        mime="text/csv"
-                    )
-    
+
     def render_visualizations_tab(self):
         """Render interactive visualizations using Plotly."""
         st.header("📊 Interactive Visualizations")
@@ -770,7 +771,7 @@ class ScreeningDashboard:
             timeframe_scores = coin_data.get('timeframe_scores', {})
             timeframe_returns = coin_data.get('timeframe_returns', {})
             
-            for timeframe in sorted(timeframe_scores.keys()):
+            for timeframe in sorted(timeframe_scores.keys(), key=int):  # Sort by numeric value
                 heatmap_data.append({
                     'Coin': coin_id,
                     'Timeframe': f"{timeframe}d",
