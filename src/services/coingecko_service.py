@@ -79,7 +79,7 @@ class CoinGeckoService:
                 raise
     
     async def fetch_historical_data(self, coin_id: str, vs_currency: str = 'btc', 
-                                  days: int = 365) -> List[Dict[str, Any]]:
+                                  days: int = 30) -> List[Dict[str, Any]]:
         """Fetch historical price data for a cryptocurrency."""
         cache_key = f"historical_{coin_id}_{vs_currency}_{days}"
         
@@ -100,7 +100,7 @@ class CoinGeckoService:
                     response = self.cg.get_coin_market_chart_by_id(
                         id=coin_id,
                         vs_currency=vs_currency,
-                        days=days if days <= 90 else 'max',
+                        days=days,  # Use the exact number of days requested
                         interval='daily'
                     )
                 
