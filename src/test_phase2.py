@@ -80,8 +80,8 @@ async def test_data_preparation():
             
             coingecko_service = CoinGeckoService()
             
-            # Fetch top 5 cryptocurrencies with 7 days of data
-            sync_stats = await coingecko_service.sync_all_data(5, 7)
+            # Fetch top 5 cryptocurrencies with 30 days of data (needed for SMA21)
+            sync_stats = await coingecko_service.sync_all_data(5, 30)
             
             print(f"✅ Sample data fetched:")
             print(f"  Cryptocurrencies: {sync_stats['cryptocurrencies_synced']}")
