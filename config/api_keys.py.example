@@ -1,0 +1,19 @@
+# API Keys Configuration
+# Copia questo file come api_keys.py e inserisci le tue API keys
+
+# CoinGecko API (gratuita)
+# Registrati su: https://www.coingecko.com/en/api
+COINGECKO_API_KEY = "your_coingecko_api_key_here"
+
+# Binance API (opzionale)
+# Registrati su: https://www.binance.com/en/my/settings/api-management
+BINANCE_API_KEY = "your_binance_api_key_here"
+BINANCE_SECRET_KEY = "your_binance_secret_key_here"
+
+# Arkadia API (se necessario)
+ARKADIA_API_KEY = "your_arkadia_api_key_here"
+
+# Note di sicurezza:
+# - Non condividere mai le tue API keys
+# - Non committare il file api_keys.py su GitHub
+# - Usa variabili d'ambiente per deployment in produzione

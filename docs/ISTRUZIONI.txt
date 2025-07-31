@@ -1,0 +1,6 @@
+1) Lanciare get_historical_data_coingecko
+2) Lanciare 2 volte screening_coins_master per calcolare i cumulativi a ritroso e in avanti (è uno dei parametri da dare al programma
+   insieme al tempo, quando conti quanto tornare indietro conta anche oggi, se su tradingview con lo strumento per misurare il range leggi 29
+   giorni devi scrivere 30)
+3) I fogli da guardare sono cumulative_changes_forward e cumulative_changes_backward (il foglio chiamato score dovrebbe combinare i due
+   punteggi ma per com'è ora non ha senso)

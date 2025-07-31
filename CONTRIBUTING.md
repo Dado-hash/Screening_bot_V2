@@ -1,118 +1,148 @@
-# Contributing to Screening Bot V2
+# Contributing to Cryptocurrency Screening Bot V2
 
-Prima di tutto, grazie per il tuo interesse nel contribuire al progetto! 🎉
+Grazie per il tuo interesse nel contribuire al progetto! 🎉
 
-## Come contribuire
+## Come Contribuire
 
-### Segnalazione di bug
+### 🐛 Segnalazione Bug
 
-Se trovi un bug, per favore crea un issue con:
-- Una descrizione dettagliata del problema
-- I passi per riprodurre il bug
-- Il comportamento atteso vs quello osservato
-- La versione di Python e del sistema operativo utilizzato
+1. Controlla se il bug è già stato segnalato negli [issues](../../issues)
+2. Se non esiste, crea un nuovo issue con:
+   - Descrizione chiara del problema
+   - Passi per riprodurre il bug
+   - Comportamento atteso vs comportamento attuale
+   - Informazioni sull'ambiente (OS, Python version, etc.)
 
-### Proposte di nuove funzionalità
+### 💡 Proposte di Nuove Funzionalità
 
-Per proporre nuove funzionalità:
-1. Controlla prima se esiste già un issue simile
-2. Crea un nuovo issue descrivendo la funzionalità
-3. Spiega perché sarebbe utile
-4. Fornisci dettagli implementativi se possibile
+1. Apri un issue per discutere la funzionalità
+2. Descrivi:
+   - Il problema che risolve
+   - Come dovrebbe funzionare
+   - Possibili implementazioni
 
-### Pull Requests
+### 🔧 Pull Requests
 
 1. **Fork** il repository
 2. **Crea un branch** per la tua feature:
    ```bash
-   git checkout -b feature/amazing-feature
+   git checkout -b feature/nome-feature
    ```
-3. **Fai le tue modifiche** seguendo le linee guida del codice
-4. **Aggiungi test** per le nuove funzionalità
-5. **Assicurati** che tutti i test passino:
+3. **Fai le modifiche** seguendo gli standard del codice
+4. **Testa** le modifiche
+5. **Commit** con messaggi descrittivi:
    ```bash
-   make test
+   git commit -m "Add: nuova funzionalità per analisi volatilità"
    ```
-6. **Formatta il codice**:
+6. **Push** del branch:
    ```bash
-   make format
+   git push origin feature/nome-feature
    ```
-7. **Controlla il linting**:
-   ```bash
-   make lint
-   ```
-8. **Commit** le tue modifiche con messaggi chiari
-9. **Push** al tuo fork
-10. **Apri una Pull Request**
+7. **Apri una Pull Request**
 
-## Linee guida per il codice
+## 📋 Standard del Codice
 
-### Stile del codice
-- Usa [Black](https://black.readthedocs.io/) per la formattazione (max 88 caratteri per riga)
-- Segui [PEP 8](https://pep8.org/) per lo stile Python
-- Usa [flake8](https://flake8.pycqa.org/) per il linting
+### Python Style Guide
 
-### Documentazione
-- Aggiungi docstring per tutte le funzioni pubbliche
-- Usa type hints quando possibile
-- Aggiorna il README.md se necessario
+- Segui [PEP 8](https://pep8.org/)
+- Usa nomi descrittivi per variabili e funzioni
+- Aggiungi docstrings per classi e funzioni
+- Mantieni le linee sotto i 100 caratteri
 
-### Test
-- Scrivi test per tutte le nuove funzionalità
-- Mantieni una copertura dei test > 80%
-- Usa pytest per i test
+### Esempio di Docstring
 
-### Messaggi di commit
-Usa messaggi di commit chiari e descrittivi:
-```
-feat: aggiungi supporto per nuova API
-fix: risolvi problema di connessione al database
-docs: aggiorna README con nuove istruzioni
-test: aggiungi test per calcolo performance
+```python
+def analyze_volatility(prices: List[float], window: int = 20) -> float:
+    """
+    Calcola la volatilità dei prezzi usando la deviazione standard.
+    
+    Args:
+        prices: Lista dei prezzi da analizzare
+        window: Finestra temporale per il calcolo (default: 20)
+        
+    Returns:
+        Volatilità come percentuale
+        
+    Raises:
+        ValueError: Se prices è vuota o window è invalido
+    """
+    pass
 ```
 
-## Configurazione dell'ambiente di sviluppo
+### Struttura dei Commit
 
-1. **Clona il repository**:
-   ```bash
-   git clone https://github.com/Dado-hash/Screening_bot_V2.git
-   cd Screening_bot_V2
-   ```
+Usa questo formato per i messaggi di commit:
 
-2. **Crea un ambiente virtuale**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   # oppure
-   venv\Scripts\activate  # Windows
-   ```
+```
+Tipo: breve descrizione (max 50 caratteri)
 
-3. **Installa le dipendenze**:
-   ```bash
-   make install
-   ```
+Descrizione dettagliata se necessaria.
+- Cosa è stato cambiato
+- Perché è stato cambiato
+- Come testare la modifica
+```
 
-4. **Configura il database di test**:
-   ```bash
-   createdb screeningbot_test
-   ```
+Tipi di commit:
+- `Add`: Nuove funzionalità
+- `Fix`: Correzione bug
+- `Update`: Aggiornamenti di codice esistente
+- `Remove`: Rimozione di codice
+- `Docs`: Modifiche alla documentazione
+- `Style`: Modifiche di formattazione
+- `Refactor`: Refactoring del codice
+- `Test`: Aggiunta/modifica test
 
-5. **Esegui i test**:
-   ```bash
-   make test
-   ```
+## 🧪 Testing
 
-## Processo di review
+Prima di sottomettere una PR:
 
-1. Tutte le PR devono passare i controlli automatici (CI)
-2. Almeno un maintainer deve approvare la PR
-3. Il codice deve essere ben documentato e testato
-4. Le modifiche breaking devono essere chiaramente indicate
+1. **Testa il codice** su diversi scenari
+2. **Verifica** che tutti i file Python siano syntatticamente corretti
+3. **Controlla** che non ci siano regressioni nelle funzionalità esistenti
 
-## Domande?
+### Test di Base
 
-Se hai domande, non esitare a:
-- Aprire un issue per discussioni pubbliche
-- Contattare i maintainer
+```bash
+# Test sintassi
+python -m py_compile src/**/*.py
 
-Grazie per il tuo contributo! 🚀
+# Test funzionalità principali
+python src/data_fetchers/get_historical_data_coingecko.py
+python src/analyzers/screening_coins_master.py
+```
+
+## 📚 Documentazione
+
+Se aggiungi nuove funzionalità:
+
+1. **Aggiorna** il README.md se necessario
+2. **Aggiungi** esempi in `examples/`
+3. **Documenta** nuovi parametri e configurazioni
+4. **Includi** commenti nel codice per logiche complesse
+
+## 🎯 Aree di Contributo
+
+Cerchiamo aiuto in particolare su:
+
+- **Nuovi indicatori tecnici**
+- **Integrazione con altre API**
+- **Miglioramenti UI/UX**
+- **Ottimizzazioni performance**
+- **Test automatizzati**
+- **Documentazione**
+
+## ❓ Domande
+
+Se hai domande:
+
+1. Controlla la [documentazione](docs/)
+2. Cerca negli [issues](../../issues) esistenti
+3. Apri un nuovo issue con tag "question"
+
+## 🏆 Riconoscimenti
+
+Tutti i contributori saranno aggiunti alla lista dei collaboratori nel README.
+
+---
+
+Grazie per aver contribuito! 🚀
