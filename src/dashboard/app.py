@@ -529,6 +529,9 @@ class ScreeningDashboard:
                 
                 st.dataframe(display_df, use_container_width=True)
             
+            # Daily Evolution Table (like your Excel cumulative_changes)
+            self.render_daily_evolution_table(results)
+            
             # Export functionality
             self.render_export_section(results)
     
@@ -549,6 +552,130 @@ class ScreeningDashboard:
                         st.error("Export failed")
                 except Exception as e:
                     st.error(f"Export error: {e}")
+    
+    def render_daily_evolution_table(self, results: Dict[str, Any]):
+        """Render daily evolution table like the Excel cumulative_changes."""
+        st.subheader("📊 Daily Evolution - Cumulative Changes (Like Excel)")
+        
+        if not results.get('leaderboard'):
+            st.warning("No leaderboard data available for daily evolution.")
+            return
+        
+        # Extract timeframe data from leaderboard
+        leaderboard = results.get('leaderboard', [])
+        timeframes = results.get('timeframes', [])
+        
+        if not timeframes:
+            st.warning("No timeframes data available.")
+            return
+        
+        # Create evolution dataframe
+        evolution_data = []
+        
+        for coin_data in leaderboard:
+            coin_id = coin_data['coin_id']
+            timeframe_scores = coin_data.get('timeframe_scores', {})
+            timeframe_returns = coin_data.get('timeframe_returns', {})
+            
+            # Create row for this coin
+            row = {'Coin': coin_id}
+            
+            # Add scores for each timeframe (day)
+            for tf in sorted(timeframes):
+                if tf in timeframe_scores:
+                    score = timeframe_scores[tf]
+                    return_pct = timeframe_returns.get(tf, 0)
+                    # Show score and return percentage
+                    row[f'{tf}d Score'] = score
+                    row[f'{tf}d Return%'] = round(return_pct, 2)
+                else:
+                    row[f'{tf}d Score'] = 0
+                    row[f'{tf}d Return%'] = 0.0
+            
+            # Add total score
+            row['Total Score'] = coin_data.get('total_score', 0)
+            row['Final Rank'] = coin_data.get('final_rank', 0)
+            
+            evolution_data.append(row)
+        
+        if evolution_data:
+            evolution_df = pd.DataFrame(evolution_data)
+            
+            # Sort by Total Score (descending)
+            evolution_df = evolution_df.sort_values('Total Score', ascending=False)
+            
+            st.write(f"**Evolution table for {len(evolution_df)} coins across {len(timeframes)} timeframes**")
+            
+            # Style the dataframe
+            styled_df = evolution_df.style.format({
+                col: '{:.1f}' for col in evolution_df.columns if 'Score' in col
+            }).format({
+                col: '{:.2f}%' for col in evolution_df.columns if 'Return%' in col
+            }).background_gradient(subset=[col for col in evolution_df.columns if 'Score' in col], cmap='RdYlGn')
+            
+            st.dataframe(styled_df, use_container_width=True)
+            
+            # Interactive filters
+            with st.expander("🔍 Filter & Analysis Tools"):
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    min_total_score = st.number_input(
+                        "Minimum Total Score",
+                        value=0,
+                        step=1,
+                        help="Filter coins with total score above this value"
+                    )
+                
+                with col2:
+                    top_n_coins = st.number_input(
+                        "Show Top N Coins",
+                        value=min(10, len(evolution_df)),
+                        min_value=1,
+                        max_value=len(evolution_df),
+                        help="Show only top N performing coins"
+                    )
+                
+                # Apply filters
+                filtered_df = evolution_df[evolution_df['Total Score'] >= min_total_score].head(top_n_coins)
+                
+                if not filtered_df.empty:
+                    st.write(f"**Filtered Results: {len(filtered_df)} coins**")
+                    
+                    # Create summary stats
+                    st.write("**Performance Summary:**")
+                    summary_cols = st.columns(4)
+                    
+                    with summary_cols[0]:
+                        avg_total_score = filtered_df['Total Score'].mean()
+                        st.metric("Avg Total Score", f"{avg_total_score:.1f}")
+                    
+                    with summary_cols[1]:
+                        best_coin = filtered_df.iloc[0]['Coin'] if not filtered_df.empty else "N/A"
+                        st.metric("Best Coin", best_coin)
+                    
+                    with summary_cols[2]:
+                        max_score = filtered_df['Total Score'].max()
+                        st.metric("Max Score", f"{max_score:.1f}")
+                    
+                    with summary_cols[3]:
+                        score_std = filtered_df['Total Score'].std()
+                        st.metric("Score Std Dev", f"{score_std:.1f}")
+                    
+                    # Show filtered table
+                    st.dataframe(
+                        filtered_df.style.format({
+                            col: '{:.1f}' for col in filtered_df.columns if 'Score' in col
+                        }).format({
+                            col: '{:.2f}%' for col in filtered_df.columns if 'Return%' in col
+                        }).background_gradient(
+                            subset=[col for col in filtered_df.columns if 'Score' in col], 
+                            cmap='RdYlGn'
+                        ),
+                        use_container_width=True
+                    )
+        else:
+            st.warning("No evolution data available to display.")
         
         with col2:
             if st.button("📋 Download JSON"):
