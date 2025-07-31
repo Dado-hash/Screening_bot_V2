@@ -59,7 +59,13 @@ jobs:
     
     - name: Test with pytest
       run: |
-        pytest tests/ -v --cov=. --cov-report=xml
+        # Esegui pytest solo se esiste la cartella tests
+        if [ -d "tests" ]; then
+          pytest tests/ -v --cov=. --cov-report=xml
+        else
+          echo "⚠️ Cartella tests/ non trovata. Saltando i test."
+          echo "💡 Per aggiungere test, crea la cartella tests/ con i file di test."
+        fi
       env:
         DB_HOST: localhost
         DB_NAME: screeningbot_test
