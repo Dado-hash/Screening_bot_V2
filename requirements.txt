@@ -25,5 +25,8 @@ scikit-learn>=1.1.0
 scipy>=1.9.0
 
 # Development tools (optional)
+flake8>=6.0.0
+black>=23.0.0
+pytest>=7.0.0
 jupyter>=1.0.0
 ipython>=8.0.0
