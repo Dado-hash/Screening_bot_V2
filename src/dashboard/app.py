@@ -195,30 +195,19 @@ class ScreeningDashboard:
         # Data fetching section
         st.subheader("🚀 Fetch New Cryptocurrency Data")
         
-        col1, col2 = st.columns(2)
+        st.markdown("### 🥇 CoinGecko - Top by Market Cap")
         
-        with col1:
-            st.markdown("### 🥇 CoinGecko - Top by Market Cap")
-            
-            number_coins = st.number_input(
-                "Number of top coins to fetch",
-                min_value=10,
-                max_value=1000,
-                value=100,
-                step=10,
-                help="Fetch top cryptocurrencies by market capitalization"
-            )
-            
-            if st.button("🔄 Fetch from CoinGecko", type="primary"):
-                self.fetch_coingecko_data(number_coins)
+        number_coins = st.number_input(
+            "Number of top coins to fetch",
+            min_value=10,
+            max_value=1000,
+            value=100,
+            step=10,
+            help="Fetch top cryptocurrencies by market capitalization"
+        )
         
-        with col2:
-            st.markdown("### ⚡ Binance - All BTC Pairs")
-            
-            st.info("Fetches all active BTC trading pairs from Binance exchange")
-            
-            if st.button("🔄 Fetch from Binance"):
-                self.fetch_binance_data()
+        if st.button("🔄 Fetch from CoinGecko", type="primary"):
+            self.fetch_coingecko_data(number_coins)
         
         st.divider()
         
@@ -251,7 +240,7 @@ class ScreeningDashboard:
                     if selected_coins_for_history:
                         self.fetch_historical_data(selected_coins_for_history, history_days)
         else:
-            st.warning("No coins available. Please fetch coins from CoinGecko or Binance first.")
+            st.warning("No coins available. Please fetch coins from CoinGecko first.")
         
         st.divider()
 
@@ -282,26 +271,6 @@ class ScreeningDashboard:
                     
             except Exception as e:
                 st.error(f"Error fetching CoinGecko data: {e}")
-    
-    def fetch_binance_data(self):
-        """Fetch cryptocurrency data from Binance."""
-        with st.spinner("🔄 Fetching BTC pairs from Binance..."):
-            try:
-                result = self.data_service.populate_coins_from_binance()
-                
-                if result.get('success'):
-                    st.success(f"✅ Binance fetch completed!")
-                    st.write(f"- Added: {result.get('added', 0)} new coins")
-                    st.write(f"- Updated: {result.get('updated', 0)} existing coins")
-                    st.write(f"- Total: {result.get('total', 0)} coins processed")
-                    
-                    # Refresh the page to show updated stats
-                    st.rerun()
-                else:
-                    st.error(f"❌ Binance fetch failed: {result.get('error', 'Unknown error')}")
-                    
-            except Exception as e:
-                st.error(f"Error fetching Binance data: {e}")
     
     def fetch_historical_data(self, coin_ids: List[str], days: int):
         """Fetch historical data for selected coins."""

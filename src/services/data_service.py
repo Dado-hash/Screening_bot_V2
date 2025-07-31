@@ -304,80 +304,7 @@ class DataService:
         except Exception as e:
             logger.error(f"Error populating coins from CoinGecko: {e}")
             return {'success': False, 'error': str(e)}
-    
-    def populate_coins_from_binance(self) -> Dict[str, Any]:
-        """Populate database with BTC pairs from Binance."""
-        logger.info("Fetching BTC pairs from Binance")
-        
-        try:
-            # Import here to avoid issues if Binance API is not configured
-            from binance import Client
-            from config.settings import get_api_config
-            
-            api_config = get_api_config()
-            
-            if not api_config.binance_api_key or not api_config.binance_secret_key:
-                return {'success': False, 'error': 'Binance API keys not configured'}
-            
-            client = Client(api_config.binance_api_key, api_config.binance_secret_key)
-            exchange_info = client.get_exchange_info()
-            
-            btc_pairs = []
-            for symbol_info in exchange_info['symbols']:
-                if symbol_info["quoteAsset"] == 'BTC' and symbol_info['status'] == 'TRADING':
-                    btc_pairs.append({
-                        'symbol': symbol_info['symbol'],
-                        'base_asset': symbol_info['baseAsset'],
-                        'quote_asset': symbol_info['quoteAsset'],
-                        'is_active': True
-                    })
-            
-            logger.info(f"Found {len(btc_pairs)} BTC pairs on Binance")
-            
-            # Store in database
-            with DatabaseTransaction() as session:
-                crypto_repo = CryptocurrencyRepository(session)
-                added_count = 0
-                updated_count = 0
-                
-                for pair_data in btc_pairs:
-                    # Use base asset as coin_id (remove BTC suffix from symbol)
-                    base_asset = pair_data['base_asset'].lower()
-                    symbol = pair_data['symbol']
-                    
-                    # Check if coin exists
-                    existing_crypto = crypto_repo.get_by_coin_id(base_asset)
-                    
-                    if existing_crypto:
-                        # Update existing
-                        existing_crypto.symbol = pair_data['base_asset']
-                        existing_crypto.is_active = True
-                        updated_count += 1
-                    else:
-                        # Create new
-                        new_crypto = crypto_repo.create(
-                            coin_id=base_asset,
-                            name=pair_data['base_asset'],
-                            symbol=pair_data['base_asset'],
-                            is_active=True
-                        )
-                        added_count += 1
-                
-                session.commit()
-                
-                logger.info(f"Binance import completed: {added_count} added, {updated_count} updated")
-                
-                return {
-                    'success': True,
-                    'added': added_count,
-                    'updated': updated_count,
-                    'total': added_count + updated_count
-                }
-                
-        except Exception as e:
-            logger.error(f"Error populating coins from Binance: {e}")
-            return {'success': False, 'error': str(e)}
-    
+
     async def fetch_and_store_historical_data(self, coin_ids: List[str], days: int = 30) -> Dict[str, Any]:
         """Fetch and store historical data for given coins."""
         logger.info(f"Fetching historical data for {len(coin_ids)} coins, {days} days")
@@ -519,13 +446,6 @@ class DataService:
                 'max_coins': 1000,
                 'data_quality': 'High (with API key) / Medium (without API key)',
                 'has_api_key': bool(api_config.coingecko_api_key and api_config.coingecko_api_key != "your_coingecko_api_key_here")
-            },
-            'binance': {
-                'available': bool(api_config.binance_api_key and api_config.binance_secret_key and 
-                                api_config.binance_api_key != "your_binance_api_key_here"),
-                'description': 'All BTC trading pairs on Binance',
-                'max_coins': 'All available pairs',
-                'data_quality': 'High'
             }
         }
         
